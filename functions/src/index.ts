@@ -12,7 +12,7 @@ const FIELD_ORDER_AMOUNT = 'order_amount';
 const FIELD_ORDER_COUNT = 'order_count';
 
 
-exports.updateOrderDashboard = functions.database.ref('/orders')
+exports.updateOrderDashboard = functions.database.ref('/orders/{pushId}')
   .onCreate((snapshot) => {
     // ref
     const ref = admin.database().ref(DASHBOARD_TABLE_NAME);
@@ -25,24 +25,13 @@ exports.updateOrderDashboard = functions.database.ref('/orders')
 
     // snapshot
     //
-    // '-L_gA35kEwOMQhVzAcnK':
     //    { amount: 1,
     //      createdAt: 1552298033584,
     //      userId: 'flvoa9ATJXT06UhfLauXJE9COxn1' }
-    let amount = 0;
-    snapshot.forEach((child) => {
-      console.log(child);
-
-      const info = child.val();
-      amount = info['amount'];
-
-      // stop enumerate
-      return true;
-    });
-
+    const info = snapshot.val();
     const updateAmount = ref.child(FIELD_ORDER_AMOUNT)
       .transaction((current) => {
-        return (current || 0) + amount;
+        return (current || 0) + info['amount'];
       });
 
     const promises = [updateCount, updateAmount];
